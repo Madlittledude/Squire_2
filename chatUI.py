@@ -31,10 +31,6 @@ def chatbot_ui_page():
             avatar = "ASSETS/Madlittledude 2_white.png" if message["role"] == "assistant" else "ASSETS/madlittledude_flipped.png"
             display_chat_message(message["role"], message["content"], avatar)
 
-            avatar = ("ASSETS/Madlittledude 2_white.png" 
-                      if message["role"] == "assistant" 
-                      else "ASSETS/madlittledude_flipped.png")
-            display_chat_message(message["role"], message["content"], avatar)
 
         prompt = st.chat_input("Start thinking with your fingers...get your thoughts out")
         if prompt:
