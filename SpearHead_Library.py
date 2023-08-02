@@ -66,7 +66,6 @@ def spearhead_library():
             st.success(f"{uploaded_file.name} has been uploaded!")
 
     # Allow user to initiate the processing only if a PDF is present in the PDF folder
-        # Allow user to initiate the processing only if a PDF is present in the PDF folder
     if os.listdir('Library/PDF'):
         pathtoPDF = 'Library/PDF'  # Moved up here
         pathtoText = 'Library/TEXT'  # Moved up here
