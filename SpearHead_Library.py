@@ -67,13 +67,10 @@ def spearhead_library():
 
     # Allow user to initiate the processing only if a PDF is present in the PDF folder
     if os.listdir('Library/PDF'):
-        
-        if st.button("Process PDF"):       
-            error_message = process_pdfs(pathtoPDF, pathtoText)
-            if error_message:
-                st.error(f"Error occurred during processing: {error_message}")
-            pathtoPDF = 'Library/PDF'
-            pathtoText = 'Library/TEXT'
+        pathtoPDF = 'Library/PDF'  # Moved up here
+        pathtoText = 'Library/TEXT'  # Moved up here
+
+        if st.button("Process PDF"):
             status_box = st.empty()
             processing_thread = threading.Thread(target=process_pdfs, args=(pathtoPDF, pathtoText, status_box))
             processing_thread.start()
@@ -89,10 +86,10 @@ def spearhead_library():
             progress_bar.progress(100)
             if os.listdir('Library/TEXT'):  # Check if the TEXT directory has any files before loading data
                 index, query_engine = load_data_and_index()
-                
+
     # Step 2: Input user queries and display responses
     # This part should be shown only if the index has been loaded (i.e., after PDF processing)
-    if 'query_engine' in locals():  
+    if 'query_engine' in locals():
         user_query = st.text_input("Enter your question:")
         if user_query:
             response_text, sources = get_response(user_query, query_engine)
@@ -101,6 +98,3 @@ def spearhead_library():
 
 if __name__ == "__main__":
     spearhead_library()
-
-
-
