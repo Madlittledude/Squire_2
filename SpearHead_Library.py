@@ -66,6 +66,7 @@ def spearhead_library():
             st.success(f"{uploaded_file.name} has been uploaded!")
 
     # Allow user to initiate the processing only if a PDF is present in the PDF folder
+        # Allow user to initiate the processing only if a PDF is present in the PDF folder
     if os.listdir('Library/PDF'):
         pathtoPDF = 'Library/PDF'  # Moved up here
         pathtoText = 'Library/TEXT'  # Moved up here
@@ -86,6 +87,7 @@ def spearhead_library():
             progress_bar.progress(100)
             if os.listdir('Library/TEXT'):  # Check if the TEXT directory has any files before loading data
                 index, query_engine = load_data_and_index()
+
 
     # Step 2: Input user queries and display responses
     # This part should be shown only if the index has been loaded (i.e., after PDF processing)
