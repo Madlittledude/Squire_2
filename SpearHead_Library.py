@@ -90,12 +90,24 @@ def spearhead_library():
 
     # Step 2: Input user queries and display responses
     # This part should be shown only if the index has been loaded (i.e., after PDF processing)
+    # Check and initialize session state for user query
+    if 'user_query' not in st.session_state:
+        st.session_state.user_query = ""
+
+    # Step 2: Input user queries and display responses
+    # This part should be shown only if the index has been loaded (i.e., after PDF processing)
     if 'query_engine' in locals():
-        user_query = st.text_input("Enter your question:")
-        if user_query:
-            response_text, sources = get_response(user_query, query_engine)
-            st.write("Response:", response_text)
-            st.write("Sources:", ', '.join([f"{Path(f).stem} (Page: {p})" for f, p in sources]))
+        st.session_state.user_query = st.text_input("Enter your question:", value=st.session_state.user_query)
+        
+        if st.session_state.user_query:
+            response_text, sources = get_response(st.session_state.user_query, query_engine)
+            
+            # Check if the response is not empty
+            if response_text:
+                st.write("Response:", response_text)
+                st.write("Sources:", ', '.join([f"{Path(f).stem} (Page: {p})" for f, p in sources]))
+            else:
+                st.write("No response found for the query.")
 
 if __name__ == "__main__":
     spearhead_library()
