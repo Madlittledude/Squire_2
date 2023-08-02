@@ -52,18 +52,42 @@ def spearhead_library():
 
     if uploaded_file:
         file_extension = uploaded_file.name.split('.')[-1].lower()
-        
-        # If the file is a PDF, store it first
+
         if file_extension == 'pdf':
             with open(os.path.join("Library/PDF", uploaded_file.name), "wb") as file:
                 file.write(uploaded_file.getbuffer())
             st.success(f"{uploaded_file.name} has been stored!")
-
-        # If the file is a TXT, simply save it to the TEXT library
         elif file_extension == 'txt':
             with open(os.path.join("Library/TEXT", uploaded_file.name), "wb") as file:
                 file.write(uploaded_file.getbuffer())
             st.success(f"{uploaded_file.name} has been uploaded!")
+
+    pdf_files = os.listdir('Library/PDF')
+
+    # Allow user to initiate the processing only if a PDF is present in the PDF folder
+    if pdf_files:
+        if st.button("Process PDF"):
+            status_box = st.empty()
+            processing_thread = threading.Thread(target=process_pdfs, args=('Library/PDF', 'Library/TEXT', status_box))
+            processing_thread.start()
+            
+            progress_bar = st.progress(0)
+            num_files = len(pdf_files)
+            for i in range(num_files):
+                while processing_thread.is_alive():
+                    time.sleep(0.1)
+                    progress_bar.progress((i + 1) / num_files * 100)
+            processing_thread.join()
+
+            st.success(f"All PDFs have been processed!")
+
+            # Display the names of the processed PDFs to the user
+            st.write("Processed PDFs:")
+            for pdf_file in pdf_files:
+                st.write(pdf_file)
+            
+            # Loading data to the vector database
+            index, query_engine = load_data_and_index()
 
     # Allow user to initiate the processing only if a PDF is present in the PDF folder
     if os.listdir('Library/PDF'):
