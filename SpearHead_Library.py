@@ -51,7 +51,7 @@ def spearhead_library():
             
             status_box.write("Processing PDFs...")
             # Process the uploaded PDFs in a separate thread to prevent blocking
-            threading.Thread(target=process_pdfs, args=(status_box, "pdf_uploads", "text_files")).start()
+            threading.Thread(target=process_pdfs, args=(status_box, "Library/PDF", "Library/TEXT")).start()
     
     if user_query:
         index, query_engine = load_data_and_index('Library/TEXT')
