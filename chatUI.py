@@ -28,10 +28,10 @@ def chatbot_ui_page():
         for message in st.session_state.messages:
             if message["role"] == "system":
                 continue
-            avatar = "Squire_2/ASSETS/Madlittledude 2_white.png" if message["role"] == "assistant" else "Squire_2/ASSETS/madlittledude_flipped.png"
+            avatar = "ASSETS/Madlittledude 2_white.png" if message["role"] == "assistant" else "ASSETS/madlittledude_flipped.png"
             display_chat_message(message["role"], message["content"], avatar)
 
-            avatar = ("Squire_2/ASSETS/Madlittledude 2_white.png" 
+            avatar = ("ASSETS/Madlittledude 2_white.png" 
                       if message["role"] == "assistant" 
                       else "ASSETS/madlittledude_flipped.png")
             display_chat_message(message["role"], message["content"], avatar)
@@ -41,9 +41,9 @@ def chatbot_ui_page():
             st.session_state.first_message_sent = True
             st.session_state.messages.append({"role": "user", "content": prompt})
             display_chat_message("user", prompt, 
-                                 avatar="Squire_2/ASSETS/madlittledude_flipped.png")
+                                 avatar="ASSETS/madlittledude_flipped.png")
             with st.chat_message("assistant", 
-                                 avatar="Squire_2/ASSETS/Madlittledude 2_white.png"):
+                                 avatar="ASSETS/Madlittledude 2_white.png"):
                 message_placeholder = st.empty()
                 full_response = ""
                 for response in openai.ChatCompletion.create(
