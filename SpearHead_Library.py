@@ -53,26 +53,31 @@ def spearhead_library():
     if uploaded_file:
         file_extension = uploaded_file.name.split('.')[-1].lower()
         
-        # If the file is a PDF, process it using the PDF functions and save as TXT
+        # If the file is a PDF, store it first
         if file_extension == 'pdf':
             with open(os.path.join("Library/PDF", uploaded_file.name), "wb") as file:
                 file.write(uploaded_file.getbuffer())
-            pathtoPDF = 'Library/PDF'
-            pathtoText = 'Library/Text'
-            status_box = st.empty()
-            processing_thread = threading.Thread(target=process_pdfs, args=(pathtoPDF, pathtoText, status_box))
-            processing_thread.start()
-            progress_bar = st.progress(0)
-            cancel_button = st.button("Cancel Processing")
-            while processing_thread.is_alive():
-                if cancel_button:
-                    status_box.write("Processing cancelled.")
-                    break
-                time.sleep(0.1)
-                progress_bar.progress(50)
-            processing_thread.join()
-            progress_bar.progress(100)
+            st.success(f"{uploaded_file.name} has been stored!")
             
+            # Allow user to initiate the processing
+            if st.button("Process PDF"):
+                pathtoPDF = 'Library/PDF'
+                pathtoText = 'Library/Text'
+                status_box = st.empty()
+                processing_thread = threading.Thread(target=process_pdfs, args=(pathtoPDF, pathtoText, status_box))
+                processing_thread.start()
+                progress_bar = st.progress(0)
+                cancel_button = st.button("Cancel Processing")
+                while processing_thread.is_alive():
+                    if cancel_button:
+                        status_box.write("Processing cancelled.")
+                        break
+                    time.sleep(0.1)
+                    progress_bar.progress(50)
+                processing_thread.join()
+                progress_bar.progress(100)
+                index, query_engine = load_data_and_index()
+                
         # If the file is a TXT, simply save it to the TEXT library
         elif file_extension == 'txt':
             with open(os.path.join("Library/TEXT", uploaded_file.name), "wb") as file:
@@ -80,12 +85,13 @@ def spearhead_library():
             st.success(f"{uploaded_file.name} has been uploaded!")
         
     # Step 2: Input user queries and display responses
-    user_query = st.text_input("Enter your question:")
-    if user_query:
-        index, query_engine = load_data_and_index()
-        response_text, sources = get_response(user_query, query_engine)
-        st.write("Response:", response_text)
-        st.write("Sources:", ', '.join([f"{Path(f).stem} (Page: {p})" for f, p in sources]))
+    # This part should be shown only if the index has been loaded (i.e., after PDF processing)
+    if 'query_engine' in locals():  
+        user_query = st.text_input("Enter your question:")
+        if user_query:
+            response_text, sources = get_response(user_query, query_engine)
+            st.write("Response:", response_text)
+            st.write("Sources:", ', '.join([f"{Path(f).stem} (Page: {p})" for f, p in sources]))
 
 if __name__ == "__main__":
     spearhead_library()
