@@ -2,8 +2,7 @@ import streamlit as st
 import openai
 import os
 
-
-
+mld = 'https://github.com/Madlittledude/Squire_2/blob/3fb406d599a23943500c920d86682a4e85f94f34/ASSETS/Madlittledude%202_white.png'
 
 #### Interface for CHAT with Squire
 def chatbot_ui_page():
@@ -28,7 +27,7 @@ def chatbot_ui_page():
         for message in st.session_state.messages:
             if message["role"] == "system":
                 continue
-            avatar = "ASSETS/Madlittledude 2_white.png" if message["role"] == "assistant" else "ASSETS/madlittledude_flipped.png"
+            avatar = "ASSETS/Madlittledude 2_white.png" if message["role"] == "assistant" else mld
             display_chat_message(message["role"], message["content"], avatar)
 
 
@@ -37,7 +36,7 @@ def chatbot_ui_page():
             st.session_state.first_message_sent = True
             st.session_state.messages.append({"role": "user", "content": prompt})
             display_chat_message("user", prompt, 
-                                 avatar="ASSETS/madlittledude_flipped.png")
+                                 avatar=mld)
             with st.chat_message("assistant", 
                                  avatar="ASSETS/Madlittledude 2_white.png"):
                 message_placeholder = st.empty()
