@@ -1,110 +1,68 @@
 import streamlit as st
 import os
-import threading
-import time
-import re
-from pathlib import Path
-from pdf2text import process_pdfs, create_text_folder
-from llama_index import SimpleDirectoryReader, VectorStoreIndex
+from llama_index import SimpleDirectoryReader
 from llama_index.node_parser import SimpleNodeParser
+from llama_index import VectorStoreIndex
+from pdf2image import convert_from_path
+import threading
 
-# Helper Functions
-def find_page_number(node_text, document_path):
-    search_text = node_text[:30]
-
-    with open(document_path, 'r', encoding='utf-8') as f:
-        content = f.read()
-
-    position = content.find(search_text)
-    if position == -1:
-        return None
-
-    subsequent_content = content[position:]
-    page_match = re.search(r'Page: (\d+)', subsequent_content)
-    return int(page_match.group(1)) if page_match else None
-
-@st.cache_resource()
-def load_data_and_index():
+def load_data_and_index(path_to_texts):
     filename_fn = lambda filename: {'file_name': filename}
-    documents = SimpleDirectoryReader('Library/TEXT', file_metadata=filename_fn).load_data()
+    documents = SimpleDirectoryReader(path_to_texts, file_metadata=filename_fn).load_data()
+    parser = SimpleNodeParser()
+    nodes = parser.get_nodes_from_documents(documents)
     index = VectorStoreIndex.from_documents(documents)
     query_engine = index.as_query_engine(max_nodes=6, max_tokens=500)
     return index, query_engine
 
-def get_response(user_query, query_engine):
-    response = query_engine.query(user_query)
-    node_texts = [node.node.text[:30] for node in response.source_nodes]
-    filenames = [node.node.metadata['file_name'] for node in response.source_nodes]
-    pages = [find_page_number(node_text, Path(f)) for node_text, f in zip(node_texts, filenames)]
-    sources = [(f, p) for f, p in zip(filenames, pages) if p is not None]
-    return response.response, sources
+def save_images_from_pdf(pdf_path, image_path):
+    images = convert_from_path(pdf_path)
+    for i, img in enumerate(images):
+        img.save(f"{image_path}/page_{i}.png", "PNG")
+
+def process_pdfs(status_box, path_to_pdfs, path_to_texts):
+    for file in os.listdir(path_to_pdfs):
+        if file.endswith(".pdf"):
+            pdf_path = os.path.join(path_to_pdfs, file)
+            save_images_from_pdf(pdf_path, path_to_texts)
+    status_box.write("PDFs processed and converted to text.")
 
 def spearhead_library():
-    st.title("SpearHead_Library")
+    st.title("SpearHead Library ChatBot")
 
-    # Ensure the necessary folders exist
-    for folder in ["Library/PDF", "Library/TEXT"]:
-        if not os.path.exists(folder):
-            os.makedirs(folder)
+    # PDF upload
+    uploaded_files = st.file_uploader("Upload PDFs", type="pdf", accept_multiple_files=True)
+    process_button = st.button("Process PDFs")
+    user_query = st.text_input("Enter your question:")
+    status_box = st.empty()
 
-    # File Uploader with unique key
-    uploaded_file = st.file_uploader("Upload a document", type=["pdf", "txt"], key='spearhead_file_uploader')
-    
-    if uploaded_file:
-        file_extension = uploaded_file.name.split('.')[-1].lower()
+    if process_button:
+        if uploaded_files:
+            # Create directories if they don't exist
+            if not os.path.exists("pdf_uploads"):
+                os.makedirs("pdf_uploads")
+            if not os.path.exists("text_files"):
+                os.makedirs("text_files")
 
-        if file_extension == 'pdf':
-            with open(os.path.join("Library/PDF", uploaded_file.name), "wb") as file:
-                file.write(uploaded_file.getbuffer())
-            st.success(f"{uploaded_file.name} has been stored!")
-        elif file_extension == 'txt':
-            with open(os.path.join("Library/TEXT", uploaded_file.name), "wb") as file:
-                file.write(uploaded_file.getbuffer())
-            st.success(f"{uploaded_file.name} has been uploaded!")
-
-    pdf_files = os.listdir('Library/PDF')
-    
-    # Processing PDF Button with unique key
-    if pdf_files and st.button("Process PDF", key='spearhead_process_pdf_button'):
-        status_box = st.empty()
-        pathtoPDF = 'Library/PDF'  
-        pathtoText = 'Library/TEXT'  
-
-        processing_thread = threading.Thread(target=process_pdfs, args=(pathtoPDF, pathtoText, status_box))
-        processing_thread.start()
-
-        progress_bar = st.progress(0)
-        cancel_button = st.button("Cancel Processing", key='spearhead_cancel_processing_button')
-        while processing_thread.is_alive():
-            if cancel_button:
-                status_box.write("Processing cancelled.")
-                break
-            time.sleep(0.1)
-            progress_bar.progress(50)
-        processing_thread.join()
-        progress_bar.progress(100)
-
-        if os.listdir('Library/TEXT'):  # Check if the TEXT directory has any files before loading data
-            index, query_engine = load_data_and_index()
-
-    # User query input with unique key
-    if 'user_query' not in st.session_state:
-        st.session_state.user_query = ""
-
-    if 'query_engine' in locals():
-        st.session_state.user_query = st.text_input("Enter your question:", value=st.session_state.user_query, key='spearhead_query_input')
-        
-        if st.session_state.user_query:
-            response_text, sources = get_response(st.session_state.user_query, query_engine)
+            # Save the PDFs
+            for uploaded_file in uploaded_files:
+                with open(f"pdf_uploads/{uploaded_file.name}", "wb") as f:
+                    f.write(uploaded_file.getbuffer())
             
-            # Check if the response is not empty
-            if response_text:
-                st.write("Response:", response_text)
-                st.write("Sources:", ', '.join([f"{Path(f).stem} (Page: {p})" for f, p in sources]))
-            else:
-                st.write("No response found for the query.")
-
-
+            status_box.write("Processing PDFs...")
+            # Process the uploaded PDFs in a separate thread to prevent blocking
+            threading.Thread(target=process_pdfs, args=(status_box, "pdf_uploads", "text_files")).start()
+    
+    if user_query:
+        index, query_engine = load_data_and_index('text_files')
+        response = query_engine.query(user_query)
+        response_text = response.response
+        filenames = [node.node.metadata['file_name'].split('/')[-1].split('.')[0] for node in response.source_nodes]
+        st.write(response_text)
+        st.write("Sources:", ', '.join(filenames))
+    elif not user_query and not process_button:
+        st.write("Upload PDFs, process them, then enter your query in the textbox.")
 
 if __name__ == "__main__":
     spearhead_library()
+
