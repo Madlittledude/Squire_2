@@ -46,7 +46,7 @@ def spearhead_library():
 
             # Save the PDFs
             for uploaded_file in uploaded_files:
-                with open(f"pdf_uploads/{uploaded_file.name}", "wb") as f:
+                with open(f"Library_PDF/{uploaded_file.name}", "wb") as f:
                     f.write(uploaded_file.getbuffer())
             
             status_box.write("Processing PDFs...")
