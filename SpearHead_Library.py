@@ -83,7 +83,8 @@ def spearhead_library():
                 progress_bar.progress(50)
             processing_thread.join()
             progress_bar.progress(100)
-            index, query_engine = load_data_and_index()
+            if os.listdir('Library/TEXT'):  # Check if the TEXT directory has any files before loading data
+                index, query_engine = load_data_and_index()
                 
     # Step 2: Input user queries and display responses
     # This part should be shown only if the index has been loaded (i.e., after PDF processing)
