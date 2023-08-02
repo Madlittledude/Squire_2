@@ -69,7 +69,7 @@ def spearhead_library():
     if os.listdir('Library/PDF'):
         if st.button("Process PDF"):
             pathtoPDF = 'Library/PDF'
-            pathtoText = 'Library/Text'
+            pathtoText = 'Library/TEXT'
             status_box = st.empty()
             processing_thread = threading.Thread(target=process_pdfs, args=(pathtoPDF, pathtoText, status_box))
             processing_thread.start()
