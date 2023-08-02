@@ -28,7 +28,7 @@ def process_pdfs(status_box, path_to_pdfs, path_to_texts):
     status_box.write("PDFs processed and converted to text.")
 
 def spearhead_library():
-    st.title("SpearHead Library ChatBot")
+    st.title("SpearHead Library")
 
     # PDF upload
     uploaded_files = st.file_uploader("Upload PDFs", type="pdf", accept_multiple_files=True)
@@ -39,10 +39,10 @@ def spearhead_library():
     if process_button:
         if uploaded_files:
             # Create directories if they don't exist
-            if not os.path.exists("pdf_uploads"):
-                os.makedirs("pdf_uploads")
-            if not os.path.exists("text_files"):
-                os.makedirs("text_files")
+            if not os.path.exists("Library/PDF"):
+                os.makedirs("Library/PDF")
+            if not os.path.exists("Library/TEXT"):
+                os.makedirs("Library/TEXT")
 
             # Save the PDFs
             for uploaded_file in uploaded_files:
@@ -54,7 +54,7 @@ def spearhead_library():
             threading.Thread(target=process_pdfs, args=(status_box, "pdf_uploads", "text_files")).start()
     
     if user_query:
-        index, query_engine = load_data_and_index('text_files')
+        index, query_engine = load_data_and_index('Library/TEXT')
         response = query_engine.query(user_query)
         response_text = response.response
         filenames = [node.node.metadata['file_name'].split('/')[-1].split('.')[0] for node in response.source_nodes]
