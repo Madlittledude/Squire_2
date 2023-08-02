@@ -48,7 +48,7 @@ def spearhead_library():
             os.makedirs(folder)
 
     # File Uploader with unique key
-    uploaded_file = st.file_uploader("Upload a document", type=["pdf", "txt"], key='unique_file_uploader')
+    uploaded_file = st.file_uploader("Upload a document", type=["pdf", "txt"], key='spearhead_file_uploader')
     
     if uploaded_file:
         file_extension = uploaded_file.name.split('.')[-1].lower()
@@ -65,7 +65,7 @@ def spearhead_library():
     pdf_files = os.listdir('Library/PDF')
     
     # Processing PDF Button with unique key
-    if pdf_files and st.button("Process PDF", key='unique_process_pdf_button'):
+    if pdf_files and st.button("Process PDF", key='spearhead_process_pdf_button'):
         status_box = st.empty()
         pathtoPDF = 'Library/PDF'  
         pathtoText = 'Library/TEXT'  
@@ -74,7 +74,7 @@ def spearhead_library():
         processing_thread.start()
 
         progress_bar = st.progress(0)
-        cancel_button = st.button("Cancel Processing", key='unique_cancel_processing_button')
+        cancel_button = st.button("Cancel Processing", key='spearhead_cancel_processing_button')
         while processing_thread.is_alive():
             if cancel_button:
                 status_box.write("Processing cancelled.")
@@ -92,7 +92,7 @@ def spearhead_library():
         st.session_state.user_query = ""
 
     if 'query_engine' in locals():
-        st.session_state.user_query = st.text_input("Enter your question:", value=st.session_state.user_query, key='unique_query_input')
+        st.session_state.user_query = st.text_input("Enter your question:", value=st.session_state.user_query, key='spearhead_query_input')
         
         if st.session_state.user_query:
             response_text, sources = get_response(st.session_state.user_query, query_engine)
@@ -103,6 +103,7 @@ def spearhead_library():
                 st.write("Sources:", ', '.join([f"{Path(f).stem} (Page: {p})" for f, p in sources]))
             else:
                 st.write("No response found for the query.")
+
 
 
 if __name__ == "__main__":
