@@ -39,7 +39,7 @@ def get_response(user_query, query_engine):
     sources = [(f, p) for f, p in zip(filenames, pages) if p is not None]
     return response.response, sources
 
-ddef spearhead_library():
+def spearhead_library():
     st.title("SpearHead_Library")
 
     # Ensure the necessary folders exist
