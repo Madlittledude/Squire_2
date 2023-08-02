@@ -49,7 +49,7 @@ def spearhead_library():
 
     # Step 1: Upload Files
     uploaded_file = st.file_uploader("Upload a document", type=["pdf", "txt"])
-    
+
     if uploaded_file:
         file_extension = uploaded_file.name.split('.')[-1].lower()
         
@@ -58,32 +58,33 @@ def spearhead_library():
             with open(os.path.join("Library/PDF", uploaded_file.name), "wb") as file:
                 file.write(uploaded_file.getbuffer())
             st.success(f"{uploaded_file.name} has been stored!")
-            
-            # Allow user to initiate the processing
-            if st.button("Process PDF"):
-                pathtoPDF = 'Library/PDF'
-                pathtoText = 'Library/Text'
-                status_box = st.empty()
-                processing_thread = threading.Thread(target=process_pdfs, args=(pathtoPDF, pathtoText, status_box))
-                processing_thread.start()
-                progress_bar = st.progress(0)
-                cancel_button = st.button("Cancel Processing")
-                while processing_thread.is_alive():
-                    if cancel_button:
-                        status_box.write("Processing cancelled.")
-                        break
-                    time.sleep(0.1)
-                    progress_bar.progress(50)
-                processing_thread.join()
-                progress_bar.progress(100)
-                index, query_engine = load_data_and_index()
-                
+
         # If the file is a TXT, simply save it to the TEXT library
         elif file_extension == 'txt':
             with open(os.path.join("Library/TEXT", uploaded_file.name), "wb") as file:
                 file.write(uploaded_file.getbuffer())
             st.success(f"{uploaded_file.name} has been uploaded!")
-        
+
+    # Allow user to initiate the processing only if a PDF is present in the PDF folder
+    if os.listdir('Library/PDF'):
+        if st.button("Process PDF"):
+            pathtoPDF = 'Library/PDF'
+            pathtoText = 'Library/Text'
+            status_box = st.empty()
+            processing_thread = threading.Thread(target=process_pdfs, args=(pathtoPDF, pathtoText, status_box))
+            processing_thread.start()
+            progress_bar = st.progress(0)
+            cancel_button = st.button("Cancel Processing")
+            while processing_thread.is_alive():
+                if cancel_button:
+                    status_box.write("Processing cancelled.")
+                    break
+                time.sleep(0.1)
+                progress_bar.progress(50)
+            processing_thread.join()
+            progress_bar.progress(100)
+            index, query_engine = load_data_and_index()
+                
     # Step 2: Input user queries and display responses
     # This part should be shown only if the index has been loaded (i.e., after PDF processing)
     if 'query_engine' in locals():  
@@ -95,3 +96,6 @@ def spearhead_library():
 
 if __name__ == "__main__":
     spearhead_library()
+
+
+
