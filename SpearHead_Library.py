@@ -67,7 +67,11 @@ def spearhead_library():
 
     # Allow user to initiate the processing only if a PDF is present in the PDF folder
     if os.listdir('Library/PDF'):
-        if st.button("Process PDF"):
+        
+        if st.button("Process PDF"):       
+            error_message = process_pdfs(pathtoPDF, pathtoText)
+            if error_message:
+                st.error(f"Error occurred during processing: {error_message}")
             pathtoPDF = 'Library/PDF'
             pathtoText = 'Library/TEXT'
             status_box = st.empty()
