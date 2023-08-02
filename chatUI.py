@@ -24,7 +24,13 @@ def chatbot_ui_page():
         st.write('  :heart: Max')
     
     def display_chat_interface():
+        
         for message in st.session_state.messages:
+            if message["role"] == "system":
+                continue
+            avatar = "Squire_2/ASSETS/Madlittledude 2_white.png" if message["role"] == "assistant" else "Squire_2/ASSETS/madlittledude_flipped.png"
+            display_chat_message(message["role"], message["content"], avatar)
+
             avatar = ("Squire_2/ASSETS/Madlittledude 2_white.png" 
                       if message["role"] == "assistant" 
                       else "ASSETS/madlittledude_flipped.png")
