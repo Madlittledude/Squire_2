@@ -39,9 +39,14 @@ def get_response(user_query, query_engine):
     sources = [(f, p) for f, p in zip(filenames, pages) if p is not None]
     return response.response, sources
 
-def spearhead_library():
+ddef spearhead_library():
     st.title("SpearHead_Library")
-    
+
+    # Ensure the necessary folders exist
+    for folder in ["Library/PDF", "Library/TEXT"]:
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+
     # Step 1: Upload Files
     uploaded_file = st.file_uploader("Upload a document", type=["pdf", "txt"])
     
